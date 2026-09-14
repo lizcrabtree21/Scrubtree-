@@ -20,6 +20,33 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Supabase setup
+
+This app uses Supabase for auth and data. Set `NEXT_PUBLIC_SUPABASE_URL` and
+`NEXT_PUBLIC_SUPABASE_ANON_KEY` in `.env.local` (see `.env.example`).
+
+The database schema (enums, `surgeons`/`users` tables, the first-signup
+bootstrap trigger, and row level security policies) lives in
+`supabase/migrations/0001_users_surgeons_auth.sql`. Apply it once against
+your project — the anon key the app uses has no permission to run DDL, so
+this can't happen automatically:
+
+- Supabase dashboard → SQL Editor → paste the file's contents → Run, or
+- `supabase db push` if you have the Supabase CLI linked to this project.
+
+Schema summary:
+
+- `public.surgeons (id, name, created_at)`
+- `public.users (id → auth.users, name, role: nurse|surgeon|admin, surgeon_id → surgeons, status: pending|active|rejected, created_at)`
+- A trigger on `auth.users` inserts the matching `public.users` row on
+  sign-up. The very first user ever to sign up becomes `role = admin`,
+  `status = active`; everyone after that gets the role they chose at
+  sign-up and starts at `status = pending`.
+- RLS: a user can read/update only their own row; admins can read/update
+  every row. A second trigger blocks non-admins from changing their own
+  `role`/`status`/`surgeon_id` even though they can update their row.
+- `/signup`, `/login`, and `/logout` pages handle auth.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
