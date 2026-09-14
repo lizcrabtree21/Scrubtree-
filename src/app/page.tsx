@@ -1,4 +1,5 @@
 import Image from "next/image";
+import SupabaseStatus from "./supabase-status";
 
 export default function Home() {
   return (
@@ -37,6 +38,7 @@ export default function Home() {
             </a>{" "}
             center.
           </p>
+          <SupabaseStatus />
         </div>
         <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
           <a
