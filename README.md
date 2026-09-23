@@ -27,11 +27,11 @@ This app uses Supabase for auth and data. Set `NEXT_PUBLIC_SUPABASE_URL` and
 
 The database schema (enums, `surgeons`/`users` tables, the first-signup
 bootstrap trigger, and row level security policies) lives in
-`supabase/migrations/0001_users_surgeons_auth.sql`. Apply it once against
-your project — the anon key the app uses has no permission to run DDL, so
-this can't happen automatically:
+`supabase/migrations/`. Apply the migrations once, in order, against your
+project — the anon key the app uses has no permission to run DDL, so this
+can't happen automatically:
 
-- Supabase dashboard → SQL Editor → paste the file's contents → Run, or
+- Supabase dashboard → SQL Editor → paste each file's contents in order → Run, or
 - `supabase db push` if you have the Supabase CLI linked to this project.
 
 Schema summary:
@@ -41,11 +41,18 @@ Schema summary:
 - A trigger on `auth.users` inserts the matching `public.users` row on
   sign-up. The very first user ever to sign up becomes `role = admin`,
   `status = active`; everyone after that gets the role they chose at
-  sign-up and starts at `status = pending`.
+  sign-up and starts at `status = pending`. A surgeon signing up can link
+  to an existing `surgeons` row or create their own (also done inside the
+  trigger, so the `surgeons` table itself stays admin-write-only via RLS).
 - RLS: a user can read/update only their own row; admins can read/update
   every row. A second trigger blocks non-admins from changing their own
   `role`/`status`/`surgeon_id` even though they can update their row.
 - `/signup`, `/login`, and `/logout` pages handle auth.
+- Pending/rejected users see a "waiting for approval" / "access declined"
+  screen instead of the app (`src/app/app-gate.tsx`); this is UX only —
+  the real enforcement is the RLS policies above, which apply no matter
+  what the client requests.
+- `/admin` lists pending sign-ups for an admin to grant or deny.
 
 ## Learn More
 

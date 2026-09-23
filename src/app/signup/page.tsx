@@ -12,7 +12,11 @@ export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState<Exclude<UserRole, "admin">>("nurse");
+  const [surgeonChoice, setSurgeonChoice] = useState<"existing" | "new">(
+    "existing",
+  );
   const [surgeonId, setSurgeonId] = useState("");
+  const [newSurgeonName, setNewSurgeonName] = useState("");
   const [surgeons, setSurgeons] = useState<Surgeon[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -23,7 +27,10 @@ export default function SignupPage() {
       .from("surgeons")
       .select("id, name, created_at")
       .order("name")
-      .then(({ data }) => setSurgeons(data ?? []));
+      .then(({ data }) => {
+        setSurgeons(data ?? []);
+        if (!data || data.length === 0) setSurgeonChoice("new");
+      });
   }, []);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -38,7 +45,14 @@ export default function SignupPage() {
         data: {
           name,
           role,
-          surgeon_id: surgeonId || null,
+          surgeon_id:
+            role === "surgeon" && surgeonChoice === "existing"
+              ? surgeonId || null
+              : null,
+          new_surgeon_name:
+            role === "surgeon" && surgeonChoice === "new"
+              ? newSurgeonName || null
+              : null,
         },
       },
     });
@@ -118,21 +132,56 @@ export default function SignupPage() {
             <option value="surgeon">Surgeon</option>
           </select>
         </label>
-        <label className="flex flex-col gap-1 text-sm">
-          Surgeon (optional)
-          <select
-            className="rounded border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
-            value={surgeonId}
-            onChange={(e) => setSurgeonId(e.target.value)}
-          >
-            <option value="">None</option>
-            {surgeons.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.name}
-              </option>
-            ))}
-          </select>
-        </label>
+        {role === "surgeon" && (
+          <fieldset className="flex flex-col gap-2 text-sm">
+            <legend className="mb-1">Which surgeon are you?</legend>
+            <label className="flex items-center gap-2">
+              <input
+                type="radio"
+                name="surgeonChoice"
+                checked={surgeonChoice === "existing"}
+                onChange={() => setSurgeonChoice("existing")}
+              />
+              I&apos;m already listed
+            </label>
+            {surgeonChoice === "existing" && (
+              <select
+                className="rounded border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
+                value={surgeonId}
+                required
+                onChange={(e) => setSurgeonId(e.target.value)}
+              >
+                <option value="" disabled>
+                  Select your name
+                </option>
+                {surgeons.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name}
+                  </option>
+                ))}
+              </select>
+            )}
+            <label className="flex items-center gap-2">
+              <input
+                type="radio"
+                name="surgeonChoice"
+                checked={surgeonChoice === "new"}
+                onChange={() => setSurgeonChoice("new")}
+              />
+              I&apos;m not listed yet
+            </label>
+            {surgeonChoice === "new" && (
+              <input
+                className="rounded border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
+                type="text"
+                placeholder="Your name as it should appear"
+                required
+                value={newSurgeonName}
+                onChange={(e) => setNewSurgeonName(e.target.value)}
+              />
+            )}
+          </fieldset>
+        )}
         {error && <p className="text-sm text-red-600">{error}</p>}
         <button
           type="submit"

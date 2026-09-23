@@ -1,27 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
-import { supabase } from "@/lib/supabase";
-import { useSession } from "@/hooks/useSession";
-import type { UserProfile } from "@/lib/database";
+import { useProfile } from "@/hooks/useProfile";
 
 export default function AccountPanel() {
-  const { session, loading } = useSession();
-  const [profile, setProfile] = useState<UserProfile | null>(null);
-
-  useEffect(() => {
-    if (!session) {
-      Promise.resolve().then(() => setProfile(null));
-      return;
-    }
-    supabase
-      .from("users")
-      .select("id, name, role, surgeon_id, status, created_at")
-      .eq("id", session.user.id)
-      .single()
-      .then(({ data }) => setProfile(data));
-  }, [session]);
+  const { session, profile, loading } = useProfile();
 
   if (loading) return null;
 
@@ -60,9 +43,16 @@ export default function AccountPanel() {
           </>
         )}
       </p>
-      <Link href="/logout" className="font-medium underline">
-        Log out
-      </Link>
+      <div className="flex items-center gap-4">
+        {profile?.role === "admin" && (
+          <Link href="/admin" className="font-medium underline">
+            Admin
+          </Link>
+        )}
+        <Link href="/logout" className="font-medium underline">
+          Log out
+        </Link>
+      </div>
     </div>
   );
 }
