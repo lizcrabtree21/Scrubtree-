@@ -25,7 +25,7 @@ export default function SignupPage() {
   useEffect(() => {
     supabase
       .from("surgeons")
-      .select("id, name, created_at")
+      .select("id, name, specialty, is_demo, created_at")
       .order("name")
       .then(({ data }) => {
         setSurgeons(data ?? []);

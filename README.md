@@ -54,6 +54,35 @@ Schema summary:
   what the client requests.
 - `/admin` lists pending sign-ups for an admin to grant or deny.
 
+### Surgeon directory, procedure library, and preference records
+
+- `public.procedures (id, name, category, definition, summary, is_demo)`
+- `public.procedure_steps (id, procedure_id → procedures, step_order, title, description, is_demo)`
+- `public.surgeons` gains `specialty` and `is_demo` columns.
+- `public.surgeon_prefs (id, surgeon_id → surgeons, procedure_id → procedures, instrument_set, equipment jsonb, sutures, table_orientation, table_angle, consoles jsonb, notes, is_demo)`
+- `public.surgeon_pref_steps (surgeon_pref_id → surgeon_prefs, step_id → procedure_steps, instrument)`
+- RLS: any user with `status = 'active'` (or an admin) can read these
+  tables; only admins can insert/update/delete, via the same `is_admin()`
+  helper as the users table, plus a new `is_active_user()` helper.
+- `0004_seed_demo_data.sql` seeds two example surgeons, two example
+  procedures with steps, and one example preference record, all flagged
+  `is_demo = true`. The step content is a generic placeholder — the
+  original prototype file wasn't available when this was written, so it's
+  not a copy of it; replace it via the admin forms once you've reviewed it.
+- `/surgeons` (directory, searchable) → `/surgeons/[id]` (a surgeon's
+  saved preferences vs. library procedures they don't have one for yet) →
+  `/surgeons/[id]/procedures/[procedureId]` (the detail page: instrument
+  set, equipment, sutures, a theatre set-up diagram, and a
+  general-steps/surgeon-steps toggle showing the instrument per step).
+- `/procedures` (library, by category, searchable) → `/procedures/[id]`
+  (definition, overview, general steps, and links to any surgeon-specific
+  versions).
+- Admin-only forms: `/admin/surgeons/new`, `/admin/procedures/new`, and
+  `/admin/surgeon-prefs/new` (linked from a surgeon's "not yet set up"
+  list) / `/admin/surgeon-prefs/[prefId]/edit`.
+- Everyone signed in and active can browse; only admins can add/edit
+  directly for now (Stage 4 adds a nurse edit-request workflow).
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

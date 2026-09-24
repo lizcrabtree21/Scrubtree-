@@ -43,11 +43,29 @@ export default function AccountPanel() {
           </>
         )}
       </p>
-      <div className="flex items-center gap-4">
+      <div className="flex flex-wrap items-center gap-4">
+        {profile?.status === "active" && (
+          <>
+            <Link href="/surgeons" className="font-medium underline">
+              Surgeons
+            </Link>
+            <Link href="/procedures" className="font-medium underline">
+              Procedures
+            </Link>
+          </>
+        )}
         {profile?.role === "admin" && (
-          <Link href="/admin" className="font-medium underline">
-            Admin
-          </Link>
+          <>
+            <Link href="/admin" className="font-medium underline">
+              Admin
+            </Link>
+            <Link href="/admin/surgeons/new" className="font-medium underline">
+              Add surgeon
+            </Link>
+            <Link href="/admin/procedures/new" className="font-medium underline">
+              Add procedure
+            </Link>
+          </>
         )}
         <Link href="/logout" className="font-medium underline">
           Log out
