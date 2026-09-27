@@ -52,7 +52,7 @@ function EditPrefLoader({ prefId }: { prefId: string }) {
 export default function EditSurgeonPrefPage() {
   const params = useParams<{ prefId: string }>();
   return (
-    <RequireActive adminOnly>
+    <RequireActive>
       <EditPrefLoader prefId={params.prefId} />
     </RequireActive>
   );

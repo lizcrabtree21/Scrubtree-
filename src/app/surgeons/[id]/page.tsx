@@ -121,7 +121,7 @@ function SurgeonOverview({ surgeonId }: { surgeonId: string }) {
                     {p.category}
                   </p>
                 </div>
-                {profile?.role === "admin" && (
+                {profile && (
                   <Link
                     href={`/admin/surgeon-prefs/new?surgeonId=${surgeon.id}&procedureId=${p.id}`}
                     className="text-sm font-medium underline"

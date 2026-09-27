@@ -24,7 +24,7 @@ function NewPrefContent() {
 
 export default function NewSurgeonPrefPage() {
   return (
-    <RequireActive adminOnly>
+    <RequireActive>
       <Suspense
         fallback={
           <p className="p-8 text-sm text-zinc-500 dark:text-zinc-400">

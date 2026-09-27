@@ -2,13 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { supabase } from "@/lib/supabase";
+import { useProfile } from "@/hooks/useProfile";
 import type {
   CompassPosition,
   ConsolePosition,
   Procedure,
   ProcedureStep,
   Surgeon,
+  SurgeonPrefPayload,
 } from "@/lib/database";
 
 const COMPASS_OPTIONS: CompassPosition[] = [
@@ -34,12 +37,14 @@ export default function SurgeonPrefForm({
   existingPrefId,
 }: Props) {
   const router = useRouter();
+  const { profile } = useProfile();
   const [surgeon, setSurgeon] = useState<Surgeon | null>(null);
   const [procedure, setProcedure] = useState<Procedure | null>(null);
   const [steps, setSteps] = useState<ProcedureStep[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [submittedForApproval, setSubmittedForApproval] = useState(false);
 
   const [instrumentSet, setInstrumentSet] = useState("");
   const [equipment, setEquipment] = useState<string[]>([]);
@@ -137,7 +142,7 @@ export default function SurgeonPrefForm({
     setSubmitting(true);
     setError("");
 
-    const payload = {
+    const fields = {
       surgeon_id: surgeonId,
       procedure_id: procedureId,
       instrument_set: instrumentSet,
@@ -149,12 +154,43 @@ export default function SurgeonPrefForm({
       notes,
     };
 
+    const isAdmin = profile?.role === "admin";
+    const isTargetSurgeon =
+      profile?.role === "surgeon" && profile.surgeon_id === surgeonId;
+    const canWriteDirectly = isAdmin || isTargetSurgeon;
+
+    if (!canWriteDirectly) {
+      const requestPayload: SurgeonPrefPayload = {
+        ...fields,
+        step_instruments: stepInstruments,
+      };
+      const { error: requestError } = await supabase.from("requests").insert({
+        type: existingPrefId ? "edit" : "add",
+        target_type: "surgeon_pref",
+        target_id: existingPrefId ?? null,
+        surgeon_id: surgeonId,
+        payload: requestPayload,
+        submitted_by: profile!.id,
+        status: "pending",
+      });
+
+      setSubmitting(false);
+
+      if (requestError) {
+        setError(requestError.message);
+        return;
+      }
+
+      setSubmittedForApproval(true);
+      return;
+    }
+
     let prefId = existingPrefId;
 
     if (existingPrefId) {
       const { error: updateError } = await supabase
         .from("surgeon_prefs")
-        .update(payload)
+        .update(fields)
         .eq("id", existingPrefId);
       if (updateError) {
         setError(updateError.message);
@@ -164,7 +200,7 @@ export default function SurgeonPrefForm({
     } else {
       const { data, error: insertError } = await supabase
         .from("surgeon_prefs")
-        .insert(payload)
+        .insert(fields)
         .select("id")
         .single();
       if (insertError) {
@@ -201,6 +237,21 @@ export default function SurgeonPrefForm({
       }
     }
 
+    const auditPayload: SurgeonPrefPayload = {
+      ...fields,
+      step_instruments: stepInstruments,
+    };
+    await supabase.from("requests").insert({
+      type: existingPrefId ? "edit" : "add",
+      target_type: "surgeon_pref",
+      target_id: prefId,
+      surgeon_id: surgeonId,
+      payload: auditPayload,
+      submitted_by: profile!.id,
+      status: "approved",
+      decided_by: profile!.id,
+    });
+
     setSubmitting(false);
     router.push(`/surgeons/${surgeonId}/procedures/${procedureId}`);
   }
@@ -213,6 +264,24 @@ export default function SurgeonPrefForm({
 
   if (!surgeon || !procedure) {
     return <p className="p-8 text-sm">Surgeon or procedure not found.</p>;
+  }
+
+  if (submittedForApproval) {
+    return (
+      <main className="mx-auto flex w-full max-w-2xl flex-col gap-4 px-6 py-16">
+        <h1 className="text-2xl font-semibold">Sent for approval</h1>
+        <p className="text-zinc-600 dark:text-zinc-400">
+          Your proposed changes to {surgeon.name}&apos;s {procedure.name}{" "}
+          preferences have been sent to {surgeon.name} for approval.
+        </p>
+        <Link
+          href={`/surgeons/${surgeonId}/procedures/${procedureId}`}
+          className="self-start font-medium underline"
+        >
+          Back to the current record
+        </Link>
+      </main>
+    );
   }
 
   return (

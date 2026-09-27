@@ -125,7 +125,7 @@ function SurgeonProcedureDetail({
             {surgeon.name} doesn&apos;t have a saved preference record for this
             procedure yet.
           </p>
-          {profile?.role === "admin" && (
+          {profile && (
             <Link
               href={`/admin/surgeon-prefs/new?surgeonId=${surgeon.id}&procedureId=${procedure.id}`}
               className="self-start font-medium underline"
@@ -179,7 +179,7 @@ function SurgeonProcedureDetail({
                 </div>
               )}
             </div>
-            {profile?.role === "admin" && (
+            {profile && (
               <Link
                 href={`/admin/surgeon-prefs/${pref.id}/edit`}
                 className="self-start text-sm font-medium underline"

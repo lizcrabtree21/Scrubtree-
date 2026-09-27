@@ -77,11 +77,43 @@ Schema summary:
 - `/procedures` (library, by category, searchable) → `/procedures/[id]`
   (definition, overview, general steps, and links to any surgeon-specific
   versions).
-- Admin-only forms: `/admin/surgeons/new`, `/admin/procedures/new`, and
-  `/admin/surgeon-prefs/new` (linked from a surgeon's "not yet set up"
-  list) / `/admin/surgeon-prefs/[prefId]/edit`.
-- Everyone signed in and active can browse; only admins can add/edit
-  directly for now (Stage 4 adds a nurse edit-request workflow).
+- Forms: `/admin/surgeons/new` (still admin-only), `/admin/procedures/new`
+  and `/admin/procedures/[procedureId]/edit`, and `/admin/surgeon-prefs/new`
+  (linked from a surgeon's "not yet set up" list) /
+  `/admin/surgeon-prefs/[prefId]/edit`. Despite the URL prefix these last
+  four are open to any active user now — see Stage 4 below for what
+  actually happens on submit.
+
+### Edit requests and approvals
+
+- `public.requests (id, type: add|edit, target_type: surgeon_pref|procedure, target_id, surgeon_id, payload jsonb, submitted_by → users, status: pending|approved|rejected, decided_by → users, read_by uuid[], submitted_at, updated_at)`.
+- Submitting the surgeon-preference or procedure form now branches on who's
+  submitting: the target surgeon editing their own preference record, or
+  an admin editing anything, writes straight to `surgeon_prefs`/`procedures`
+  as before and logs an already-`approved` row in `requests` for the audit
+  trail. Anyone else (a nurse, or a surgeon proposing a change to a
+  colleague's record) instead gets a pending row in `requests` and a "sent
+  for approval" confirmation — nothing changes live until it's approved.
+- RLS: any active user can insert a request as themselves; a request is
+  visible to its submitter, its target surgeon (via a new
+  `is_target_surgeon()` helper matching `users.surgeon_id`), or an admin.
+  A trigger (`enforce_request_decision_authority`) means only the target
+  surgeon or an admin can actually change a request's status/decision —
+  everyone else's updates are limited to toggling `read_by` (marking their
+  own notifications read).
+- `surgeon_prefs`/`surgeon_pref_steps` gain a policy letting the target
+  surgeon write their own rows directly (needed for the self-edit and
+  self-approval paths); `procedures`/`procedure_steps` stay admin-only, so
+  a surgeon can never approve a procedure-library change themselves.
+- `/approvals` — a surgeon sees pending requests targeting them; an admin
+  sees every pending request plus the last 15 decisions; everyone sees
+  their own submitted requests and their outcome. Approving copies the
+  request's payload into the live table (insert for "add," update for
+  "edit"); declining only changes the request's own status.
+- A notification bell in the top bar (every page, via `src/app/layout.tsx`)
+  shows anything visible to you (per the same RLS) that you haven't
+  opened yet — a pending request awaiting your decision, or the outcome of
+  something you submitted. Opening it marks the current batch read.
 
 ## Learn More
 

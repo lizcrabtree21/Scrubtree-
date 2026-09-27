@@ -65,3 +65,43 @@ export type SurgeonPrefStep = {
   step_id: string;
   instrument: string;
 };
+
+export type RequestType = "add" | "edit";
+export type RequestTargetType = "surgeon_pref" | "procedure";
+export type RequestStatus = "pending" | "approved" | "rejected";
+
+export type SurgeonPrefPayload = {
+  surgeon_id: string;
+  procedure_id: string;
+  instrument_set: string;
+  equipment: string[];
+  sutures: string;
+  table_orientation: string;
+  table_angle: number;
+  consoles: ConsolePosition[];
+  notes: string;
+  step_instruments: Record<string, string>;
+};
+
+export type ProcedurePayload = {
+  name: string;
+  category: string;
+  definition: string;
+  summary: string;
+  steps: { title: string; description: string }[];
+};
+
+export type EditRequest = {
+  id: string;
+  type: RequestType;
+  target_type: RequestTargetType;
+  target_id: string | null;
+  surgeon_id: string | null;
+  payload: SurgeonPrefPayload | ProcedurePayload;
+  submitted_by: string;
+  status: RequestStatus;
+  decided_by: string | null;
+  read_by: string[];
+  submitted_at: string;
+  updated_at: string;
+};

@@ -52,6 +52,9 @@ export default function AccountPanel() {
             <Link href="/procedures" className="font-medium underline">
               Procedures
             </Link>
+            <Link href="/approvals" className="font-medium underline">
+              Approvals
+            </Link>
           </>
         )}
         {profile?.role === "admin" && (

@@ -5,9 +5,11 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import RequireActive from "@/components/RequireActive";
+import { useProfile } from "@/hooks/useProfile";
 import type { Procedure, ProcedureStep, Surgeon } from "@/lib/database";
 
 function ProcedureDetail({ procedureId }: { procedureId: string }) {
+  const { profile } = useProfile();
   const [procedure, setProcedure] = useState<Procedure | null>(null);
   const [steps, setSteps] = useState<ProcedureStep[]>([]);
   const [surgeonsWithPrefs, setSurgeonsWithPrefs] = useState<Surgeon[]>([]);
@@ -70,9 +72,19 @@ function ProcedureDetail({ procedureId }: { procedureId: string }) {
             {procedure.category}
           </p>
         </div>
-        <Link href="/procedures" className="text-sm font-medium underline">
-          Library
-        </Link>
+        <div className="flex items-center gap-4">
+          {profile && (
+            <Link
+              href={`/admin/procedures/${procedure.id}/edit`}
+              className="text-sm font-medium underline"
+            >
+              Edit procedure
+            </Link>
+          )}
+          <Link href="/procedures" className="text-sm font-medium underline">
+            Library
+          </Link>
+        </div>
       </div>
 
       {procedure.definition && (
