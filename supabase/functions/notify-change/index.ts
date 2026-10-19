@@ -133,6 +133,22 @@ Deno.serve(async (req) => {
           ),
         ),
       );
+    } else if (
+      table === "users" &&
+      type === "UPDATE" &&
+      old_record?.status === "pending" &&
+      record.status === "active"
+    ) {
+      const emails = await emailsForUserIds([record.id as string]);
+      await Promise.all(
+        emails.map((email) =>
+          sendEmail(
+            email,
+            "Your Scrubtree access has been approved",
+            `Good news - your Scrubtree account has been approved. You can now log in.\n\n${APP_URL}`,
+          ),
+        ),
+      );
     }
   } catch (err) {
     console.error("notify-change handler error", err);
