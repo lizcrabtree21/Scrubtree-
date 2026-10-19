@@ -115,6 +115,29 @@ Schema summary:
   opened yet — a pending request awaiting your decision, or the outcome of
   something you submitted. Opening it marks the current batch read.
 
+### Email notifications
+
+- `supabase/functions/notify-change` — a Supabase Edge Function, not part
+  of the Next.js app, so the Resend API key it uses never exists in
+  browser code or the deployed app's environment variables at all; it's
+  set only as an Edge Function secret (`RESEND_API_KEY`,
+  `RESEND_FROM_EMAIL`) via the Supabase dashboard.
+- It's invoked by **Database Webhooks** (Database → Webhooks in the
+  Supabase dashboard) configured on `public.requests` (insert + update)
+  and `public.users` (insert) — set up through the dashboard rather than
+  SQL, since that's what lets Supabase authenticate the call to the Edge
+  Function without a secret ever needing to be typed in by hand.
+- It sends a generic message and a link back to the app only — never any
+  preference/procedure content — when: a new request is created pending
+  (emails the target surgeon, if any, and every admin), a request is
+  decided (emails whoever submitted it), or a new sign-up is pending
+  (emails every admin). A direct self-edit never creates a pending
+  request in the first place, so it never emails anyone.
+- A failed send is logged (visible in the function's logs) and swallowed,
+  never thrown - and since the webhook that invokes the function fires
+  asynchronously after the database change has already committed, a bad
+  Resend key structurally cannot block or break the underlying action.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
