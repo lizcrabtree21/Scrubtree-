@@ -2,18 +2,17 @@
 
 import { useProfile } from "@/hooks/useProfile";
 
-type Props = { children: React.ReactNode };
+type Props = { children: React.ReactNode; loggedOut?: React.ReactNode };
 
-export default function AppGate({ children }: Props) {
+export default function AppGate({ children, loggedOut }: Props) {
   const { session, profile, loading } = useProfile();
 
   if (loading) {
     return <p className="text-sm text-zinc-500 dark:text-zinc-400">Loading...</p>;
   }
 
-  // Logged-out visitors see the public landing content (children).
   if (!session) {
-    return <>{children}</>;
+    return <>{loggedOut ?? children}</>;
   }
 
   if (profile?.status === "pending") {

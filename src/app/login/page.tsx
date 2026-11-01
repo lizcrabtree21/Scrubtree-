@@ -60,14 +60,14 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={submitting}
-          className="rounded-full bg-foreground px-5 py-2.5 font-medium text-background transition-colors hover:bg-[#383838] disabled:opacity-50 dark:hover:bg-[#ccc]"
+          className="rounded-full bg-brand px-5 py-2.5 font-medium text-brand-foreground transition-colors hover:bg-brand-hover disabled:opacity-50"
         >
           {submitting ? "Logging in..." : "Log in"}
         </button>
       </form>
       <p className="text-sm text-zinc-600 dark:text-zinc-400">
         Don&apos;t have an account?{" "}
-        <Link href="/signup" className="font-medium underline">
+        <Link href="/signup" className="font-medium text-brand underline">
           Sign up
         </Link>
       </p>

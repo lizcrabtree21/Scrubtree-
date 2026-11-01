@@ -96,7 +96,7 @@ function SurgeonProcedureDetail({
     return (
       <main className="mx-auto flex w-full max-w-2xl flex-col gap-4 px-6 py-16">
         <p>Not found.</p>
-        <Link href="/surgeons" className="font-medium underline">
+        <Link href="/surgeons" className="font-medium text-brand underline">
           Back to surgeons
         </Link>
       </main>
@@ -114,7 +114,7 @@ function SurgeonProcedureDetail({
         </div>
         <Link
           href={`/surgeons/${surgeon.id}`}
-          className="text-sm font-medium underline"
+          className="text-sm font-medium text-brand underline"
         >
           {surgeon.name}&apos;s procedures
         </Link>
@@ -129,7 +129,7 @@ function SurgeonProcedureDetail({
           {profile && (
             <Link
               href={`/admin/surgeon-prefs/new?surgeonId=${surgeon.id}&procedureId=${procedure.id}`}
-              className="self-start font-medium underline"
+              className="self-start font-medium text-brand underline"
             >
               Add preferences
             </Link>
@@ -183,7 +183,7 @@ function SurgeonProcedureDetail({
             {profile && (
               <Link
                 href={`/admin/surgeon-prefs/${pref.id}/edit`}
-                className="self-start text-sm font-medium underline"
+                className="self-start text-sm font-medium text-brand underline"
               >
                 Edit preferences
               </Link>
@@ -211,7 +211,7 @@ function SurgeonProcedureDetail({
                 onClick={() => setShowSurgeonSteps(false)}
                 className={`rounded-full px-3 py-1 ${
                   !showSurgeonSteps
-                    ? "bg-foreground text-background"
+                    ? "bg-brand text-brand-foreground"
                     : "border border-zinc-300 dark:border-zinc-700"
                 }`}
               >
@@ -222,7 +222,7 @@ function SurgeonProcedureDetail({
                 onClick={() => setShowSurgeonSteps(true)}
                 className={`rounded-full px-3 py-1 ${
                   showSurgeonSteps
-                    ? "bg-foreground text-background"
+                    ? "bg-brand text-brand-foreground"
                     : "border border-zinc-300 dark:border-zinc-700"
                 }`}
               >

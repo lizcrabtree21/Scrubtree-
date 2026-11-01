@@ -25,7 +25,7 @@ export default function RequirePaidAccess({ children }: { children: React.ReactN
         </p>
         <Link
           href="/billing"
-          className="mx-auto rounded-full bg-foreground px-4 py-2 text-sm font-medium text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc]"
+          className="mx-auto rounded-full bg-brand px-4 py-2 text-sm font-medium text-brand-foreground transition-colors hover:bg-brand-hover"
         >
           Go to billing
         </Link>

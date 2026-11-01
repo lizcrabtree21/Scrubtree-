@@ -59,7 +59,7 @@ function NewSurgeonForm() {
         <button
           type="submit"
           disabled={submitting}
-          className="self-start rounded-full bg-foreground px-5 py-2.5 font-medium text-background transition-colors hover:bg-[#383838] disabled:opacity-50 dark:hover:bg-[#ccc]"
+          className="self-start rounded-full bg-brand px-5 py-2.5 font-medium text-brand-foreground transition-colors hover:bg-brand-hover disabled:opacity-50"
         >
           {submitting ? "Saving..." : "Add surgeon"}
         </button>

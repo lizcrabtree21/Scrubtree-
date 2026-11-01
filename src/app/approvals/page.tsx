@@ -142,7 +142,7 @@ function RequestCard({
           <button
             type="button"
             onClick={() => onApprove(req)}
-            className="rounded-full bg-foreground px-4 py-2 text-sm font-medium text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc]"
+            className="rounded-full bg-brand px-4 py-2 text-sm font-medium text-brand-foreground transition-colors hover:bg-brand-hover"
           >
             Approve
           </button>
@@ -330,7 +330,7 @@ function ApprovalsInbox() {
     <main className="mx-auto flex w-full max-w-3xl flex-col gap-8 px-6 py-16">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Approvals</h1>
-        <Link href="/" className="text-sm font-medium underline">
+        <Link href="/" className="text-sm font-medium text-brand underline">
           Home
         </Link>
       </div>

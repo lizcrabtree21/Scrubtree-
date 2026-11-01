@@ -54,7 +54,7 @@ function SurgeonOverview({ surgeonId }: { surgeonId: string }) {
     return (
       <main className="mx-auto flex w-full max-w-2xl flex-col gap-4 px-6 py-16">
         <p>Surgeon not found.</p>
-        <Link href="/surgeons" className="font-medium underline">
+        <Link href="/surgeons" className="font-medium text-brand underline">
           Back to surgeons
         </Link>
       </main>
@@ -73,7 +73,7 @@ function SurgeonOverview({ surgeonId }: { surgeonId: string }) {
             {surgeon.specialty}
           </p>
         </div>
-        <Link href="/surgeons" className="text-sm font-medium underline">
+        <Link href="/surgeons" className="text-sm font-medium text-brand underline">
           All surgeons
         </Link>
       </div>
@@ -125,7 +125,7 @@ function SurgeonOverview({ surgeonId }: { surgeonId: string }) {
                 {profile && (
                   <Link
                     href={`/admin/surgeon-prefs/new?surgeonId=${surgeon.id}&procedureId=${p.id}`}
-                    className="text-sm font-medium underline"
+                    className="text-sm font-medium text-brand underline"
                   >
                     Add preferences
                   </Link>

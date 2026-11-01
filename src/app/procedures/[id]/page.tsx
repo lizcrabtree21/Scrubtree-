@@ -57,7 +57,7 @@ function ProcedureDetail({ procedureId }: { procedureId: string }) {
     return (
       <main className="mx-auto flex w-full max-w-2xl flex-col gap-4 px-6 py-16">
         <p>Procedure not found.</p>
-        <Link href="/procedures" className="font-medium underline">
+        <Link href="/procedures" className="font-medium text-brand underline">
           Back to library
         </Link>
       </main>
@@ -77,12 +77,12 @@ function ProcedureDetail({ procedureId }: { procedureId: string }) {
           {profile && (
             <Link
               href={`/admin/procedures/${procedure.id}/edit`}
-              className="text-sm font-medium underline"
+              className="text-sm font-medium text-brand underline"
             >
               Edit procedure
             </Link>
           )}
-          <Link href="/procedures" className="text-sm font-medium underline">
+          <Link href="/procedures" className="text-sm font-medium text-brand underline">
             Library
           </Link>
         </div>
