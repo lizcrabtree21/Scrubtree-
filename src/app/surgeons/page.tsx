@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import RequireActive from "@/components/RequireActive";
+import RequirePaidAccess from "@/components/RequirePaidAccess";
 import type { Surgeon } from "@/lib/database";
 
 function SurgeonDirectory() {
@@ -30,7 +31,7 @@ function SurgeonDirectory() {
     <main className="mx-auto flex w-full max-w-2xl flex-col gap-6 px-6 py-16">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Surgeons</h1>
-        <Link href="/" className="text-sm font-medium underline">
+        <Link href="/" className="text-sm font-medium text-brand underline">
           Home
         </Link>
       </div>
@@ -71,7 +72,9 @@ function SurgeonDirectory() {
 export default function SurgeonsPage() {
   return (
     <RequireActive>
-      <SurgeonDirectory />
+      <RequirePaidAccess>
+        <SurgeonDirectory />
+      </RequirePaidAccess>
     </RequireActive>
   );
 }

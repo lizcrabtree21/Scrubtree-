@@ -22,7 +22,7 @@ export default function LogoutPage() {
         {done ? (
           <>
             You&apos;ve been logged out.{" "}
-            <Link href="/login" className="font-medium underline">
+            <Link href="/login" className="font-medium text-brand underline">
               Log in again
             </Link>
           </>

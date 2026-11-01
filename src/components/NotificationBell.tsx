@@ -102,7 +102,7 @@ export default function NotificationBell() {
           )}
           <Link
             href="/approvals"
-            className="mt-3 block text-sm font-medium underline"
+            className="mt-3 block text-sm font-medium text-brand underline"
             onClick={() => setOpen(false)}
           >
             Go to approvals

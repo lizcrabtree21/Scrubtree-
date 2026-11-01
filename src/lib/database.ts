@@ -66,6 +66,23 @@ export type SurgeonPrefStep = {
   instrument: string;
 };
 
+export type SubscriptionStatus =
+  | "trialing"
+  | "active"
+  | "past_due"
+  | "canceled"
+  | "incomplete";
+
+export type Subscription = {
+  user_id: string;
+  stripe_customer_id: string | null;
+  stripe_subscription_id: string | null;
+  status: SubscriptionStatus;
+  trial_ends_at: string | null;
+  current_period_end: string | null;
+  updated_at: string;
+};
+
 export type RequestType = "add" | "edit";
 export type RequestTargetType = "surgeon_pref" | "procedure";
 export type RequestStatus = "pending" | "approved" | "rejected";

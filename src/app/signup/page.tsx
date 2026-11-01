@@ -77,7 +77,7 @@ export default function SignupPage() {
         <h1 className="text-2xl font-semibold">Check your email</h1>
         <p className="text-zinc-600 dark:text-zinc-400">
           We sent a confirmation link to {email}. Confirm your address, then{" "}
-          <Link href="/login" className="font-medium underline">
+          <Link href="/login" className="font-medium text-brand underline">
             log in
           </Link>
           .
@@ -186,14 +186,14 @@ export default function SignupPage() {
         <button
           type="submit"
           disabled={submitting}
-          className="rounded-full bg-foreground px-5 py-2.5 font-medium text-background transition-colors hover:bg-[#383838] disabled:opacity-50 dark:hover:bg-[#ccc]"
+          className="rounded-full bg-brand px-5 py-2.5 font-medium text-brand-foreground transition-colors hover:bg-brand-hover disabled:opacity-50"
         >
           {submitting ? "Signing up..." : "Sign up"}
         </button>
       </form>
       <p className="text-sm text-zinc-600 dark:text-zinc-400">
         Already have an account?{" "}
-        <Link href="/login" className="font-medium underline">
+        <Link href="/login" className="font-medium text-brand underline">
           Log in
         </Link>
       </p>

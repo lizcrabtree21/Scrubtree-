@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import RequireActive from "@/components/RequireActive";
+import RequirePaidAccess from "@/components/RequirePaidAccess";
 import { useProfile } from "@/hooks/useProfile";
 import type { Procedure, Surgeon, SurgeonPref } from "@/lib/database";
 
@@ -53,7 +54,7 @@ function SurgeonOverview({ surgeonId }: { surgeonId: string }) {
     return (
       <main className="mx-auto flex w-full max-w-2xl flex-col gap-4 px-6 py-16">
         <p>Surgeon not found.</p>
-        <Link href="/surgeons" className="font-medium underline">
+        <Link href="/surgeons" className="font-medium text-brand underline">
           Back to surgeons
         </Link>
       </main>
@@ -72,7 +73,7 @@ function SurgeonOverview({ surgeonId }: { surgeonId: string }) {
             {surgeon.specialty}
           </p>
         </div>
-        <Link href="/surgeons" className="text-sm font-medium underline">
+        <Link href="/surgeons" className="text-sm font-medium text-brand underline">
           All surgeons
         </Link>
       </div>
@@ -124,7 +125,7 @@ function SurgeonOverview({ surgeonId }: { surgeonId: string }) {
                 {profile && (
                   <Link
                     href={`/admin/surgeon-prefs/new?surgeonId=${surgeon.id}&procedureId=${p.id}`}
-                    className="text-sm font-medium underline"
+                    className="text-sm font-medium text-brand underline"
                   >
                     Add preferences
                   </Link>
@@ -142,7 +143,9 @@ export default function SurgeonPage() {
   const params = useParams<{ id: string }>();
   return (
     <RequireActive>
-      <SurgeonOverview surgeonId={params.id} />
+      <RequirePaidAccess>
+        <SurgeonOverview surgeonId={params.id} />
+      </RequirePaidAccess>
     </RequireActive>
   );
 }

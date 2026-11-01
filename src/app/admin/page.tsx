@@ -64,7 +64,7 @@ export default function AdminPage() {
         <p className="text-zinc-600 dark:text-zinc-400">
           This page is only available to admins.
         </p>
-        <Link href="/" className="font-medium underline">
+        <Link href="/" className="font-medium text-brand underline">
           Back home
         </Link>
       </main>
@@ -75,7 +75,7 @@ export default function AdminPage() {
     <main className="mx-auto flex w-full max-w-2xl flex-col gap-6 px-6 py-24">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Pending sign-ups</h1>
-        <Link href="/" className="text-sm font-medium underline">
+        <Link href="/" className="text-sm font-medium text-brand underline">
           Back home
         </Link>
       </div>
@@ -105,7 +105,7 @@ export default function AdminPage() {
                   type="button"
                   disabled={actingOn === u.id}
                   onClick={() => decide(u.id, "active")}
-                  className="rounded-full bg-foreground px-4 py-2 text-sm font-medium text-background transition-colors hover:bg-[#383838] disabled:opacity-50 dark:hover:bg-[#ccc]"
+                  className="rounded-full bg-brand px-4 py-2 text-sm font-medium text-brand-foreground transition-colors hover:bg-brand-hover disabled:opacity-50"
                 >
                   Grant access
                 </button>

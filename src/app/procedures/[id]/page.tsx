@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import RequireActive from "@/components/RequireActive";
+import RequirePaidAccess from "@/components/RequirePaidAccess";
 import { useProfile } from "@/hooks/useProfile";
 import type { Procedure, ProcedureStep, Surgeon } from "@/lib/database";
 
@@ -56,7 +57,7 @@ function ProcedureDetail({ procedureId }: { procedureId: string }) {
     return (
       <main className="mx-auto flex w-full max-w-2xl flex-col gap-4 px-6 py-16">
         <p>Procedure not found.</p>
-        <Link href="/procedures" className="font-medium underline">
+        <Link href="/procedures" className="font-medium text-brand underline">
           Back to library
         </Link>
       </main>
@@ -76,12 +77,12 @@ function ProcedureDetail({ procedureId }: { procedureId: string }) {
           {profile && (
             <Link
               href={`/admin/procedures/${procedure.id}/edit`}
-              className="text-sm font-medium underline"
+              className="text-sm font-medium text-brand underline"
             >
               Edit procedure
             </Link>
           )}
-          <Link href="/procedures" className="text-sm font-medium underline">
+          <Link href="/procedures" className="text-sm font-medium text-brand underline">
             Library
           </Link>
         </div>
@@ -162,7 +163,9 @@ export default function ProcedurePage() {
   const params = useParams<{ id: string }>();
   return (
     <RequireActive>
-      <ProcedureDetail procedureId={params.id} />
+      <RequirePaidAccess>
+        <ProcedureDetail procedureId={params.id} />
+      </RequirePaidAccess>
     </RequireActive>
   );
 }

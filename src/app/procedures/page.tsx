@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import RequireActive from "@/components/RequireActive";
+import RequirePaidAccess from "@/components/RequirePaidAccess";
 import type { Procedure } from "@/lib/database";
 
 function ProcedureLibrary() {
@@ -41,7 +42,7 @@ function ProcedureLibrary() {
     <main className="mx-auto flex w-full max-w-2xl flex-col gap-6 px-6 py-16">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Procedure library</h1>
-        <Link href="/" className="text-sm font-medium underline">
+        <Link href="/" className="text-sm font-medium text-brand underline">
           Home
         </Link>
       </div>
@@ -91,7 +92,9 @@ function ProcedureLibrary() {
 export default function ProceduresPage() {
   return (
     <RequireActive>
-      <ProcedureLibrary />
+      <RequirePaidAccess>
+        <ProcedureLibrary />
+      </RequirePaidAccess>
     </RequireActive>
   );
 }

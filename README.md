@@ -138,6 +138,61 @@ Schema summary:
   asynchronously after the database change has already committed, a bad
   Resend key structurally cannot block or break the underlying action.
 
+### Subscriptions (Stripe)
+
+- Individual, per-nurse billing: $14.95 AUD/month, 30-day free trial, surgeons
+  and admins exempt entirely (they never see a paywall or a bill). Nurses pay
+  because they're the ones consuming surgeon preference data the surgeons
+  contribute for free - the two-sided-marketplace design behind that choice.
+- `public.subscriptions (user_id → users, stripe_customer_id, stripe_subscription_id, status: trialing|active|past_due|canceled|incomplete, trial_ends_at, current_period_end, updated_at)`.
+  RLS: a user can only ever read their own row (or an admin reads all); there
+  is no authenticated-role write policy at all - every write comes from a
+  Supabase Edge Function using the service role key, or the trigger below.
+- `start_trial_on_approval` trigger: the moment an admin approves a nurse
+  (`users.status` flips to `active`), it inserts a `trialing` row with
+  `trial_ends_at = now() + 30 days`. Surgeons and admins never get a row.
+- `has_active_access()` is the real paywall - a SECURITY DEFINER helper used
+  inside RLS: true for admins and surgeons unconditionally, otherwise true
+  only if the caller's subscription is `active`, or `trialing` with
+  `trial_ends_at` still in the future. The `procedures`, `procedure_steps`,
+  `surgeon_prefs`, and `surgeon_pref_steps` select policies now require this
+  in addition to `is_active_user()` - that's the content nurses are actually
+  paying for. The `surgeons` table (names/specialties only, no clinical
+  content) stays open to any active user, same as before.
+- `src/components/RequirePaidAccess.tsx` wraps the surgeon directory and
+  procedure library pages with a "your trial has ended, subscribe" screen -
+  UX only, same caveat as `RequireActive`: the RLS policy above is what
+  actually enforces it no matter what the client requests.
+- `/billing` shows trial days remaining, a Subscribe button, or (once
+  subscribed) a Manage billing button - and the account panel in the top bar
+  shows a running "N days left in trial" / "subscribed" / "trial ended" badge
+  for nurses.
+- Three Supabase Edge Functions do the actual Stripe work, since this app has
+  no Next.js server code and a Stripe *secret* key must never reach the
+  browser:
+  - `create-checkout-session` - creates a Stripe customer on first use,
+    starts a Checkout Session (`mode: "subscription"`) for the one Scrubtree
+    price, returns its URL.
+  - `create-portal-session` - opens a Stripe-hosted Customer Portal session
+    (update card, cancel) for the signed-in nurse's existing customer.
+  - `stripe-webhook` - the actual source of truth. Verifies the
+    `Stripe-Signature` header and syncs `subscriptions.status` /
+    `current_period_end` on `checkout.session.completed`,
+    `customer.subscription.updated`/`created`/`deleted`, and
+    `invoice.payment_failed`. The Checkout success-page redirect is never
+    trusted on its own - a closed tab or someone hitting that URL directly
+    without paying must not grant access, so only the webhook flips billing
+    state.
+- Requires these Edge Function secrets (Project Settings → Edge Functions,
+  entered directly in the dashboard - never typed into chat, same as the
+  Resend key in Stage 5): `STRIPE_SECRET_KEY`, `STRIPE_PRICE_ID` (the
+  `price_...` for the $14.95 AUD/month plan), and `STRIPE_WEBHOOK_SECRET`
+  (from the webhook's settings once it's pointed at the `stripe-webhook`
+  function's URL in the Stripe dashboard). `create-checkout-session` and
+  `create-portal-session` are deployed with JWT verification on (the caller
+  must be a signed-in Scrubtree user); `stripe-webhook` is deployed with it
+  off, since Stripe has no Supabase session to send.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

@@ -2,19 +2,21 @@
 
 import Link from "next/link";
 import { useProfile } from "@/hooks/useProfile";
+import { useSubscription } from "@/hooks/useSubscription";
 
 export default function AccountPanel() {
   const { session, profile, loading } = useProfile();
+  const { exempt, isTrialing, hasAccess, trialDaysRemaining } = useSubscription();
 
   if (loading) return null;
 
   if (!session) {
     return (
       <div className="flex items-center gap-4 text-sm">
-        <Link href="/login" className="font-medium underline">
+        <Link href="/login" className="font-medium text-brand underline">
           Log in
         </Link>
-        <Link href="/signup" className="font-medium underline">
+        <Link href="/signup" className="font-medium text-brand underline">
           Sign up
         </Link>
       </div>
@@ -40,37 +42,55 @@ export default function AccountPanel() {
             >
               {profile.status}
             </span>
+            {!exempt && profile.status === "active" && (
+              <>
+                {" "}
+                &middot;{" "}
+                <span className={hasAccess ? "text-zinc-500 dark:text-zinc-400" : "text-red-600"}>
+                  {isTrialing
+                    ? `${trialDaysRemaining} day${trialDaysRemaining === 1 ? "" : "s"} left in trial`
+                    : hasAccess
+                      ? "subscribed"
+                      : "trial ended"}
+                </span>
+              </>
+            )}
           </>
         )}
       </p>
       <div className="flex flex-wrap items-center gap-4">
         {profile?.status === "active" && (
           <>
-            <Link href="/surgeons" className="font-medium underline">
+            <Link href="/surgeons" className="font-medium text-brand underline">
               Surgeons
             </Link>
-            <Link href="/procedures" className="font-medium underline">
+            <Link href="/procedures" className="font-medium text-brand underline">
               Procedures
             </Link>
-            <Link href="/approvals" className="font-medium underline">
+            <Link href="/approvals" className="font-medium text-brand underline">
               Approvals
             </Link>
           </>
         )}
+        {profile?.role === "nurse" && profile.status === "active" && (
+          <Link href="/billing" className="font-medium text-brand underline">
+            Billing
+          </Link>
+        )}
         {profile?.role === "admin" && (
           <>
-            <Link href="/admin" className="font-medium underline">
+            <Link href="/admin" className="font-medium text-brand underline">
               Admin
             </Link>
-            <Link href="/admin/surgeons/new" className="font-medium underline">
+            <Link href="/admin/surgeons/new" className="font-medium text-brand underline">
               Add surgeon
             </Link>
-            <Link href="/admin/procedures/new" className="font-medium underline">
+            <Link href="/admin/procedures/new" className="font-medium text-brand underline">
               Add procedure
             </Link>
           </>
         )}
-        <Link href="/logout" className="font-medium underline">
+        <Link href="/logout" className="font-medium text-brand underline">
           Log out
         </Link>
       </div>
