@@ -36,31 +36,40 @@ Deno.serve(async (req) => {
     return new Response("Method not allowed", { status: 405, headers: corsHeaders });
   }
 
-  const token = req.headers.get("Authorization")?.replace("Bearer ", "");
-  if (!token) return new Response("Unauthorized", { status: 401, headers: corsHeaders });
+  try {
+    const token = req.headers.get("Authorization")?.replace("Bearer ", "");
+    if (!token) return new Response("Unauthorized", { status: 401, headers: corsHeaders });
 
-  const { data: authData, error: authError } = await admin.auth.getUser(token);
-  if (authError || !authData.user) {
-    return new Response("Unauthorized", { status: 401, headers: corsHeaders });
+    const { data: authData, error: authError } = await admin.auth.getUser(token);
+    if (authError || !authData.user) {
+      return new Response("Unauthorized", { status: 401, headers: corsHeaders });
+    }
+
+    const { data: sub } = await admin
+      .from("subscriptions")
+      .select("stripe_customer_id")
+      .eq("user_id", authData.user.id)
+      .maybeSingle();
+
+    if (!sub?.stripe_customer_id) {
+      return new Response("No billing account yet", { status: 400, headers: corsHeaders });
+    }
+
+    const session = await stripe.billingPortal.sessions.create({
+      customer: sub.stripe_customer_id,
+      return_url: `${APP_URL}/billing`,
+    });
+
+    return new Response(JSON.stringify({ url: session.url }), {
+      status: 200,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  } catch (err) {
+    console.error("create-portal-session error", err);
+    const message = err instanceof Error ? err.message : "Something went wrong.";
+    return new Response(JSON.stringify({ error: message }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
-
-  const { data: sub } = await admin
-    .from("subscriptions")
-    .select("stripe_customer_id")
-    .eq("user_id", authData.user.id)
-    .maybeSingle();
-
-  if (!sub?.stripe_customer_id) {
-    return new Response("No billing account yet", { status: 400, headers: corsHeaders });
-  }
-
-  const session = await stripe.billingPortal.sessions.create({
-    customer: sub.stripe_customer_id,
-    return_url: `${APP_URL}/billing`,
-  });
-
-  return new Response(JSON.stringify({ url: session.url }), {
-    status: 200,
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
-  });
 });

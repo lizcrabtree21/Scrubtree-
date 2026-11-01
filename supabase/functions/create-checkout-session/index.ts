@@ -41,57 +41,79 @@ Deno.serve(async (req) => {
     return new Response("Method not allowed", { status: 405, headers: corsHeaders });
   }
 
-  const token = req.headers.get("Authorization")?.replace("Bearer ", "");
-  if (!token) return new Response("Unauthorized", { status: 401, headers: corsHeaders });
+  try {
+    const token = req.headers.get("Authorization")?.replace("Bearer ", "");
+    if (!token) return new Response("Unauthorized", { status: 401, headers: corsHeaders });
 
-  const { data: authData, error: authError } = await admin.auth.getUser(token);
-  if (authError || !authData.user) {
-    return new Response("Unauthorized", { status: 401, headers: corsHeaders });
-  }
-  const userId = authData.user.id;
-  const email = authData.user.email;
+    const { data: authData, error: authError } = await admin.auth.getUser(token);
+    if (authError || !authData.user) {
+      return new Response("Unauthorized", { status: 401, headers: corsHeaders });
+    }
+    const userId = authData.user.id;
+    const email = authData.user.email;
 
-  const { data: profile, error: profileError } = await admin
-    .from("users")
-    .select("role, status")
-    .eq("id", userId)
-    .single();
-  if (profileError || !profile) {
-    return new Response("Profile not found", { status: 404, headers: corsHeaders });
-  }
-  if (profile.role !== "nurse" || profile.status !== "active") {
-    return new Response("Not eligible for billing", { status: 400, headers: corsHeaders });
-  }
+    const { data: profile, error: profileError } = await admin
+      .from("users")
+      .select("role, status")
+      .eq("id", userId)
+      .single();
+    if (profileError || !profile) {
+      return new Response("Profile not found", { status: 404, headers: corsHeaders });
+    }
+    if (profile.role !== "nurse" || profile.status !== "active") {
+      return new Response("Not eligible for billing", { status: 400, headers: corsHeaders });
+    }
 
-  const { data: sub } = await admin
-    .from("subscriptions")
-    .select("stripe_customer_id")
-    .eq("user_id", userId)
-    .maybeSingle();
-
-  let customerId = sub?.stripe_customer_id ?? null;
-  if (!customerId) {
-    const customer = await stripe.customers.create({
-      email,
-      metadata: { supabase_user_id: userId },
-    });
-    customerId = customer.id;
-    await admin
+    const { data: sub } = await admin
       .from("subscriptions")
-      .upsert({ user_id: userId, stripe_customer_id: customerId }, { onConflict: "user_id" });
+      .select("stripe_customer_id")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    // A stored customer ID can be stale (e.g. left over from a previous
+    // Stripe secret key pointing at a different account), so verify it
+    // still exists on *this* account before reusing it, rather than letting
+    // Stripe reject the whole checkout session over a bad customer ID.
+    let customerId: string | null = null;
+    if (sub?.stripe_customer_id) {
+      try {
+        await stripe.customers.retrieve(sub.stripe_customer_id);
+        customerId = sub.stripe_customer_id;
+      } catch {
+        customerId = null;
+      }
+    }
+
+    if (!customerId) {
+      const customer = await stripe.customers.create({
+        email,
+        metadata: { supabase_user_id: userId },
+      });
+      customerId = customer.id;
+      await admin
+        .from("subscriptions")
+        .upsert({ user_id: userId, stripe_customer_id: customerId }, { onConflict: "user_id" });
+    }
+
+    const session = await stripe.checkout.sessions.create({
+      mode: "subscription",
+      customer: customerId,
+      line_items: [{ price: STRIPE_PRICE_ID, quantity: 1 }],
+      success_url: `${APP_URL}/billing?checkout=success`,
+      cancel_url: `${APP_URL}/billing?checkout=canceled`,
+      client_reference_id: userId,
+    });
+
+    return new Response(JSON.stringify({ url: session.url }), {
+      status: 200,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  } catch (err) {
+    console.error("create-checkout-session error", err);
+    const message = err instanceof Error ? err.message : "Something went wrong.";
+    return new Response(JSON.stringify({ error: message }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
-
-  const session = await stripe.checkout.sessions.create({
-    mode: "subscription",
-    customer: customerId,
-    line_items: [{ price: STRIPE_PRICE_ID, quantity: 1 }],
-    success_url: `${APP_URL}/billing?checkout=success`,
-    cancel_url: `${APP_URL}/billing?checkout=canceled`,
-    client_reference_id: userId,
-  });
-
-  return new Response(JSON.stringify({ url: session.url }), {
-    status: 200,
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
-  });
 });
