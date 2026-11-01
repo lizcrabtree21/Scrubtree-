@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import RequireActive from "@/components/RequireActive";
+import RequirePaidAccess from "@/components/RequirePaidAccess";
 import type { Surgeon } from "@/lib/database";
 
 function SurgeonDirectory() {
@@ -71,7 +72,9 @@ function SurgeonDirectory() {
 export default function SurgeonsPage() {
   return (
     <RequireActive>
-      <SurgeonDirectory />
+      <RequirePaidAccess>
+        <SurgeonDirectory />
+      </RequirePaidAccess>
     </RequireActive>
   );
 }

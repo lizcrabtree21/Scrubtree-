@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import RequireActive from "@/components/RequireActive";
+import RequirePaidAccess from "@/components/RequirePaidAccess";
 import TheatreDiagram from "@/components/TheatreDiagram";
 import { useProfile } from "@/hooks/useProfile";
 import type {
@@ -266,10 +267,12 @@ export default function SurgeonProcedurePage() {
   const params = useParams<{ id: string; procedureId: string }>();
   return (
     <RequireActive>
-      <SurgeonProcedureDetail
-        surgeonId={params.id}
-        procedureId={params.procedureId}
-      />
+      <RequirePaidAccess>
+        <SurgeonProcedureDetail
+          surgeonId={params.id}
+          procedureId={params.procedureId}
+        />
+      </RequirePaidAccess>
     </RequireActive>
   );
 }

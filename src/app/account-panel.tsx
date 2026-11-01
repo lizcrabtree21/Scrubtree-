@@ -2,9 +2,11 @@
 
 import Link from "next/link";
 import { useProfile } from "@/hooks/useProfile";
+import { useSubscription } from "@/hooks/useSubscription";
 
 export default function AccountPanel() {
   const { session, profile, loading } = useProfile();
+  const { exempt, isTrialing, hasAccess, trialDaysRemaining } = useSubscription();
 
   if (loading) return null;
 
@@ -40,6 +42,19 @@ export default function AccountPanel() {
             >
               {profile.status}
             </span>
+            {!exempt && profile.status === "active" && (
+              <>
+                {" "}
+                &middot;{" "}
+                <span className={hasAccess ? "text-zinc-500 dark:text-zinc-400" : "text-red-600"}>
+                  {isTrialing
+                    ? `${trialDaysRemaining} day${trialDaysRemaining === 1 ? "" : "s"} left in trial`
+                    : hasAccess
+                      ? "subscribed"
+                      : "trial ended"}
+                </span>
+              </>
+            )}
           </>
         )}
       </p>
@@ -56,6 +71,11 @@ export default function AccountPanel() {
               Approvals
             </Link>
           </>
+        )}
+        {profile?.role === "nurse" && profile.status === "active" && (
+          <Link href="/billing" className="font-medium underline">
+            Billing
+          </Link>
         )}
         {profile?.role === "admin" && (
           <>

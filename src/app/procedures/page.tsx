@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import RequireActive from "@/components/RequireActive";
+import RequirePaidAccess from "@/components/RequirePaidAccess";
 import type { Procedure } from "@/lib/database";
 
 function ProcedureLibrary() {
@@ -91,7 +92,9 @@ function ProcedureLibrary() {
 export default function ProceduresPage() {
   return (
     <RequireActive>
-      <ProcedureLibrary />
+      <RequirePaidAccess>
+        <ProcedureLibrary />
+      </RequirePaidAccess>
     </RequireActive>
   );
 }
