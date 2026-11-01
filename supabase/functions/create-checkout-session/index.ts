@@ -8,6 +8,10 @@
 // code at all, and a Checkout Session must be created with the Stripe
 // *secret* key, which must never reach the browser.
 //
+// Called directly from the browser, so it needs CORS headers (including on
+// the OPTIONS preflight) - without them the browser blocks the request
+// before it ever reaches here and the app just sees "Failed to fetch".
+//
 // Requires these Edge Function secrets (Project Settings -> Edge Functions):
 //   STRIPE_SECRET_KEY  - sk_test_... (or sk_live_... in production)
 //   STRIPE_PRICE_ID    - price_... for the $14.95 AUD/month plan
@@ -25,14 +29,25 @@ const APP_URL = Deno.env.get("APP_URL") ?? "https://scrubtree.vercel.app";
 const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
 const stripe = new Stripe(STRIPE_SECRET_KEY, { apiVersion: "2025-10-29.clover" });
 
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, content-type, x-client-info, apikey",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
+
 Deno.serve(async (req) => {
-  if (req.method !== "POST") return new Response("Method not allowed", { status: 405 });
+  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  if (req.method !== "POST") {
+    return new Response("Method not allowed", { status: 405, headers: corsHeaders });
+  }
 
   const token = req.headers.get("Authorization")?.replace("Bearer ", "");
-  if (!token) return new Response("Unauthorized", { status: 401 });
+  if (!token) return new Response("Unauthorized", { status: 401, headers: corsHeaders });
 
   const { data: authData, error: authError } = await admin.auth.getUser(token);
-  if (authError || !authData.user) return new Response("Unauthorized", { status: 401 });
+  if (authError || !authData.user) {
+    return new Response("Unauthorized", { status: 401, headers: corsHeaders });
+  }
   const userId = authData.user.id;
   const email = authData.user.email;
 
@@ -41,9 +56,11 @@ Deno.serve(async (req) => {
     .select("role, status")
     .eq("id", userId)
     .single();
-  if (profileError || !profile) return new Response("Profile not found", { status: 404 });
+  if (profileError || !profile) {
+    return new Response("Profile not found", { status: 404, headers: corsHeaders });
+  }
   if (profile.role !== "nurse" || profile.status !== "active") {
-    return new Response("Not eligible for billing", { status: 400 });
+    return new Response("Not eligible for billing", { status: 400, headers: corsHeaders });
   }
 
   const { data: sub } = await admin
@@ -75,6 +92,6 @@ Deno.serve(async (req) => {
 
   return new Response(JSON.stringify({ url: session.url }), {
     status: 200,
-    headers: { "Content-Type": "application/json" },
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
 });
