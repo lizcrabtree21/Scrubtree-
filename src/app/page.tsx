@@ -1,3 +1,4 @@
+import Image from "next/image";
 import AccountPanel from "./account-panel";
 import AppGate from "./app-gate";
 
@@ -6,7 +7,8 @@ export default function Home() {
     <div className="flex flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
       <main className="flex w-full max-w-3xl flex-col items-center gap-10 px-6 py-24 text-center sm:items-start sm:text-left">
         <div className="flex flex-col gap-3">
-          <h1 className="text-4xl font-bold tracking-tight text-brand">
+          <h1 className="flex items-center gap-3 text-4xl font-bold tracking-tight text-brand">
+            <Image src="/logo-mark.png" alt="" width={48} height={50} aria-hidden="true" />
             Scrubtree
           </h1>
           <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">

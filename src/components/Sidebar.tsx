@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useProfile } from "@/hooks/useProfile";
 
@@ -41,7 +42,10 @@ export default function Sidebar() {
           <div className="absolute inset-0 bg-black/30" onClick={close} />
           <nav className="relative flex h-full w-64 flex-col gap-1 overflow-y-auto bg-secondary p-4 text-secondary-foreground">
             <div className="mb-4 flex items-center justify-between">
-              <span className="text-lg font-semibold">Scrubtree</span>
+              <span className="flex items-center gap-2 text-lg font-semibold">
+                <Image src="/logo-mark.png" alt="" width={28} height={29} aria-hidden="true" />
+                Scrubtree
+              </span>
               <button
                 type="button"
                 onClick={close}
