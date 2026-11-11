@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import NotificationBell from "@/components/NotificationBell";
+import Sidebar from "@/components/Sidebar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,10 +28,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <div className="flex items-center justify-between border-b border-zinc-200 px-4 py-2 dark:border-zinc-800">
-          <Link href="/" className="text-sm font-semibold text-brand">
-            Scrubtree
-          </Link>
+        <div className="flex items-center justify-between border-b border-[var(--border)] px-4 py-2">
+          <div className="flex items-center gap-2">
+            <Sidebar />
+            <Link href="/" className="text-sm font-semibold text-brand">
+              Scrubtree
+            </Link>
+          </div>
           <NotificationBell />
         </div>
         {children}

@@ -58,42 +58,6 @@ export default function AccountPanel() {
           </>
         )}
       </p>
-      <div className="flex flex-wrap items-center gap-4">
-        {profile?.status === "active" && (
-          <>
-            <Link href="/surgeons" className="font-medium text-brand underline">
-              Surgeons
-            </Link>
-            <Link href="/procedures" className="font-medium text-brand underline">
-              Procedures
-            </Link>
-            <Link href="/approvals" className="font-medium text-brand underline">
-              Approvals
-            </Link>
-          </>
-        )}
-        {profile?.role === "nurse" && profile.status === "active" && (
-          <Link href="/billing" className="font-medium text-brand underline">
-            Billing
-          </Link>
-        )}
-        {profile?.role === "admin" && (
-          <>
-            <Link href="/admin" className="font-medium text-brand underline">
-              Admin
-            </Link>
-            <Link href="/admin/surgeons/new" className="font-medium text-brand underline">
-              Add surgeon
-            </Link>
-            <Link href="/admin/procedures/new" className="font-medium text-brand underline">
-              Add procedure
-            </Link>
-          </>
-        )}
-        <Link href="/logout" className="font-medium text-brand underline">
-          Log out
-        </Link>
-      </div>
     </div>
   );
 }
