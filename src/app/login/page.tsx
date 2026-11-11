@@ -56,6 +56,12 @@ export default function LoginPage() {
             onChange={(e) => setPassword(e.target.value)}
           />
         </label>
+        <Link
+          href="/forgot-password"
+          className="self-start text-sm font-medium text-brand underline"
+        >
+          Forgot password?
+        </Link>
         {error && <p className="text-sm text-red-600">{error}</p>}
         <button
           type="submit"
